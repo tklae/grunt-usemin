@@ -15,13 +15,22 @@ describe('cssprocessor', function () {
       'images/pic.png': 'images/2123.pic.png',
       '/images/pic.png': '/images/2123.pic.png',
       '../../images/pic.png': '../../images/2123.pic.png',
-      'fonts/awesome-font.svg': 'fonts/2123.awesome-font.svg',
+      'fonts/awesome-font.svg': 'fonts/2123.awesome-font.svg'
     };
     var revvedfinder = {
+      callCount: 0,
       find: function (s) {
+        this.callCount++;
         return mapping[s] || s;
+      },
+      reset: function () {
+        this.callCount = 0;
       }
     };
+
+    beforeEach(function(){
+      revvedfinder.reset();
+    });
 
     it('should update the CSS with new img filenames', function () {
       var content = 'background-image:url(images/pic.png);';
@@ -70,6 +79,14 @@ describe('cssprocessor', function () {
       var cp = new CSSProcessor('', 'build/css', content, revvedfinder);
       var awaited = 'background-image:url(fonts/2123.awesome-font.svg?#iefix);';
       assert.equal(awaited, cp.process());
+    });
+
+    it('should cache replaced references', function () {
+      var content = 'background-image:url(images/pic.png);background-image:url(images/pic.png);';
+      var cp = new CSSProcessor('', '', content, revvedfinder);
+      var awaited = 'background-image:url(images/2123.pic.png);background-image:url(images/2123.pic.png);';
+      assert.equal(awaited, cp.process());
+      assert.equal(1, revvedfinder.callCount);
     });
   });
 });

@@ -2,7 +2,8 @@
   "globals": {
     "before": false,
     "describe": false,
-    "it": false
+    "it": false,
+    "beforeEach": false
   },
   "node": true,
   "browser": true,
